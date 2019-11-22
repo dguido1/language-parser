@@ -6,17 +6,39 @@
 ---
 <br>
 
+## Table of contents
+* [Language Parser](#language-parser)
+  * [What it does](#what-it-does)  
+  * [Instructions](#instructions)
+  * [Starter Program](#starter-program)
+  * [Steps](#steps)
+***
+<br>
+
 ## What it does
-* **Inputs** 
-[`final.txt`](/final.txt) with *'program code'*
-* **Removes** extra *white space & comments*
-* **Outputs** 
-[`abc13.cpp`](/abc.cpp) an *intermediate code translation* in the form of a *C++ program*
+* ***Inputs*** a text file with 'program code'
+* ***Removes*** extra white space & comments
+* ***Outputs*** an intermediate code translation in the form of a C++ program
 ---
 
 <br>
 
 ## Instructions
+* Have a program that
+  * ***Reads*** in the text file [`final.txt`](/final.txt)
+  * ***Formats*** it properly
+  * ***Outputs*** the result to a second text file [`formatted.txt`](/formatted.txt)
+  
+* ***Specify*** production rules using *Flex/Bison*
+
+* ***Translate*** the program into a *high level* programming language (C++)
+
+* ***Run*** [`abc13.cpp`](/abc.cpp) using the C++ compiler to the correct output
+---
+
+<br>
+
+## Starter Program
 #### &nbsp;&nbsp;&nbsp; Suppose that the context of the text file [`final.txt`](/final.txt) is<br>
   
 ```
@@ -41,8 +63,8 @@
 	END.
 ```
 
-  * Have a program that would go through the text file and format properly, outputting in a second text file
 ---
+
 
 <br>
 
@@ -71,7 +93,7 @@
 
 <br>
 
-#### 2. Specify *production rules* in *flex/bison*
+#### 2. Specify *production rules* in *Flex/Bison*
  * Given the following *CFG* (some rules are in *EBNF* form)
 
 ```
