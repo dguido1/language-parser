@@ -29,11 +29,11 @@
   * ***Formats*** it properly
   * ***Outputs*** the result to a second text file [`formatted.txt`](/formatted.txt)
   
-* ***Specify*** production rules using *Flex/Bison*
+* ***Specifies*** production rules using *Flex/Bison*
 
-* ***Translate*** the program into a *high level* programming language (C++)
+* ***Translates*** the program into a *high level* programming language (C++)
 
-* ***Run*** [`abc13.cpp`](/abc.cpp) using the C++ compiler to the correct output
+* ***Runs*** [`abc13.cpp`](/abc.cpp) using the C++ compiler to the correct output
 ---
 
 <br>
