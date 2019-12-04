@@ -39,7 +39,7 @@
     bool FileContainsContent(string inputFileName);
     void ParseHandler ();
 
-    LanguageParser langParserInstance;   // Single instance obj, namespace: 'Parser'
+    Parser::LanguageParser langParserInstance;   // Single instance obj, namespace: 'Parser'
 
     int main()   // Entry point
     {
