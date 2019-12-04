@@ -1,7 +1,8 @@
 # Language Parser
 
 ### CPSC 323 Group Project
-#### &nbsp;&nbsp;&nbsp;&nbsp;Made at [***California State University Fullerton***](http://www.fullerton.edu/)<br><br>&nbsp;&nbsp;&nbsp;&nbsp;Fall 19'
+#### &nbsp;&nbsp;&nbsp;&nbsp;Made by [@dguido1](https://github.com/dguido1), [@TimothyBui](https://github.com/TimothyBui), [@imjoshy](https://github.com/dguido1) & [@BradK14](https://github.com/BradK14)
+#### &nbsp;&nbsp;&nbsp;&nbsp;at [***California State University Fullerton***](http://www.fullerton.edu/)<br><br>&nbsp;&nbsp;&nbsp;&nbsp;Fall 19'
 
 ---
 <br>
