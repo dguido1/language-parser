@@ -23,8 +23,6 @@
 
 using namespace std;
 
-namespace Parser
-{
         // Default Constructor
         // -> Namespace::Class
     LanguageParser::LanguageParser(){}
@@ -110,4 +108,3 @@ namespace Parser
 
         // Destructor
     LanguageParser::~LanguageParser(){}
-}

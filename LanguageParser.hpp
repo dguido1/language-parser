@@ -26,8 +26,7 @@
 #include <list>
 using namespace std;
 
-namespace Parser
-{
+
     class LanguageParser
     {
         public:
@@ -49,5 +48,5 @@ namespace Parser
                                                   // to flush its output buffer
             ~LanguageParser();                    // Destructor
     };
-}
+
 #endif
