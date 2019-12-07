@@ -10,8 +10,8 @@
      Assignment:         Group Project (Language Parser)
      
      Files Included:     1.) LanguageParser.cpp
-     2.) LanguageParser.h
-     3.) LanguageParserControl.cpp
+                         2.) LanguageParser.h
+                         3.) LanguageParserControl.cpp
      ****************************************************************
      */
 
@@ -27,115 +27,146 @@
     // -> Namespace::Class
     LanguageParser::LanguageParser(){}
 
-    void LanguageParser::FormatLanguage()
+    // Handles full extent of input by calling four functions
+    void LanguageParser::HandleInput()
+    {
+        ReadFile();
+        RemoveComments();
+        RemoveWhitespace();   // At this point 0 fat on input txt file
+        AddSpacing();
+    }
+
+    // Read file into member variable 'rawData'
+    void LanguageParser::ReadFile()
     {
         char current;  // value of current parse location
-        int index = 0; // element number of current parse location
         
-        while (dataFile.get(current)){
-            switch(current)
+        while (dataFile.get(current))
+            rawData += current;
+    }
+
+    // Remove comments, save result in member variable 'formattedInput'
+    void LanguageParser::RemoveComments()
+    {
+        for (int i = 0; i < rawData.length(); i++)
+        {
+            switch(rawData.at(i))
             {
-                case '\n':
-                    
-                    if (index == 0)   // Case: First parse
+                case '(':
+                    if (rawData.at(i + 1) != '*')           // Not a comment
+                        formattedInput +=  rawData.at(i);   // Append the '(' value
+                    else
                     {
-                        formattedInput = formattedInput + ' ' + ' ';
-                        index += 2;
-                        break;        // --> Remove single blank line on line 1, top of file
-                    }
-                    else if (formattedInput[index - 1] == '\n')   // Case: Double new line
-                    {
-                        //dataFile.get(current);   // Read in first char of new line
-                        break;
-                    }
-                    else   // Case: Single newline
-                    {
-                        formattedInput += current;
-                        ++index;
-                        
-                        dataFile.get(current);   // Read in first char of new line
-                        
-                        if (current != ' ')   // Case: First char of new line is not already a space
-                        {
-                            formattedInput += "  ";
-                            index += 2;
-                            break;
-                        }
-                        
-                        break;
-                        
-                        
-                        // Case: First char of new line is already a space, no need for else
+                        while (!(rawData.at(i) == '*'))     // Check for 1st of 2 symbols that represent the closing comment
+                            ++i;
+                        while (!(rawData.at(i) == ')'))     // Check for 2nd of 2 symbols that represent the closing comment
+                            ++i;
+
+                        ++i;
                     }
                     
-                case '\t':   // Case: Tab
+                    break;
+                    
+                default:
+                    
+                    formattedInput += rawData.at(i);
+                    break;
+            }
+        }
+    }
+
+    // Remove whitespace, save result in member variable 'formattedInput'
+    void LanguageParser::RemoveWhitespace()
+    {
+        string noWhitespace;
+        
+        for (int i = 0; i < formattedInput.length(); i++)
+        {
+            switch(formattedInput.at(i))
+            {
+                case ' ':
+                case '\t':
                     break;
                     
                 case ';':
-                    if (formattedInput[index-1] == ' ')   // Case: Space before SC
-                        formattedInput[index-1] = current;
+                    if (formattedInput.at(i + 1) != '\n')
+                    {
+                        noWhitespace += formattedInput.at(i);
+                        noWhitespace += '\n';
+                        break;
+                    }
                     else
                     {
-                        formattedInput += current;   // Case: No space before SC
-                        ++index;
+                        noWhitespace += formattedInput.at(i);
+                        break;
                     }
+                    
+                case '\n':
+                    if (formattedInput.at(i - 1) == '\n')
+                        break;
+                    
+                default:
+                    noWhitespace += formattedInput.at(i);
+                    break;
+            }
+        }
+        
+        formattedInput = noWhitespace;
+    }
+
+    // Add required spacing, save result in member variable 'formattedInput'
+    void LanguageParser::AddSpacing()
+    {
+        string correctSpacing;
+        
+        correctSpacing += "  ";   // First line
+        
+        for (int i = 0; i < formattedInput.length(); i++)
+        {
+            switch(formattedInput.at(i))
+            {
+                case '\n':
+                    correctSpacing += "\n  ";
                     break;
                     
+                case ':':
                 case '-':
                 case '*':
                 case '/':
                 case '=':
+                case '+':
                     
-                    if (!(formattedInput[index - 1] == ' '))   // Case: Prev elem not a space
+                    if  (isalnum(formattedInput.at(i - 1)) && isalnum(formattedInput.at(i + 1)))
                     {
-                        formattedInput += ' ';
-                        ++index;
-                        formattedInput += current;
-                        ++index;
-                        formattedInput += " ";
-                        ++index;
-                        break;
+                        correctSpacing += ' ';
+                        correctSpacing += formattedInput.at(i);
+                        correctSpacing += ' ';
                     }
+                    else
+                        correctSpacing += formattedInput.at(i);
                     
-                case '(':
-                    dataFile.get(current);          // move forward to check for '*', the start of a comment
-                    if (current != '*'){            // not a comment
-                        dataFile.unget().unget();   // move parser back twice
-                        dataFile.get(current);      // get the '(' value we just passed by
-                        formattedInput +=  current; // append the '(' value
-                        ++index;
-                    }
-                    else {                          // start of comment | move forward until comment close: '*)'
-                        while (!(current == '*'))   // check for 1st of 2 symbols that represent the closing comment
-                            dataFile.get(current);
-                        while (!(current == ')'))   // check for 2nd of 2 symbols that represent the closing comment
-                            dataFile.get(current);
-                    }
                     break;
-                case ' ':
-                    if (formattedInput[index - 1] == ' ' ||
-                        formattedInput[index - 1] == ';')
-                    { break; }
-                    /*case '\n':
-                     if (formattedInput[index - 1] == '\n'){
-                     if (formattedInput[index - 2] == '\n')
-                     --index;
-                     break;
-                     }*/
+                    
+                case ',':
+                    
+                    correctSpacing += formattedInput.at(i);
+                    
+                    if (isalpha(formattedInput.at(i + 1)))
+                        correctSpacing += ' ';
+                    
+                    break;
+                    
                 default:
-                    if (formattedInput[index - 1] == '+' ||
-                        formattedInput[index - 1] == '-' ||
-                        formattedInput[index - 1] == '*' ||
-                        formattedInput[index - 1] == '/' ||
-                        formattedInput[index - 1] == '='){
-                        formattedInput += ' ';
-                        ++index;
-                    }
-                    formattedInput += current;
-                    ++index;
+                    
+                    if (i > 6 && formattedInput.substr(i - 7, i) == "PROGRAM")
+                        correctSpacing = correctSpacing + ' ';
+                    
+                    correctSpacing += formattedInput.at(i);
                     break;
             }
         }
+        
+        formattedInput = correctSpacing;
     }
 
     // Open File for input
@@ -168,164 +199,3 @@
 
     // Destructor
     LanguageParser::~LanguageParser(){}
-
-
-
-
-
-
-
-    /*
-     
-     #include "LanguageParser.hpp"
-     
-     #include <fstream>
-     #include <iostream>
-     #include <cstdlib>
-     #include <ctime>
-     
-     using namespace std;
-     
-     // Default Constructor
-     // -> Namespace::Class
-     LanguageParser::LanguageParser(){}
-     
-     void LanguageParser::FormatLanguage()
-     {
-     char current;    // Value of current parse location
-     int index = 0;   // Element number of current parse location
-     
-     while (dataFile.get(current))
-     {
-     switch (current)
-     {
-     case '\t':
-     break;
-     
-     
-     case '-':
-     case '*':
-     case '/':
-     case '=':
-     
-     if (!(formattedInput[index - 1] == ' '))   // If the prev elem is not a space
-     {
-     formattedInput += ' ';
-     ++index;
-     formattedInput += current;
-     ++index;
-     formattedInput += " ";
-     ++index;
-     
-     break;
-     }
-     
-     case ';':
-     if (formattedInput[index-1] == ' ')
-     {
-     formattedInput[index-1] = current;
-     }
-     //else if (formattedInput[index+1] == ' ')
-     //{
-     
-     //}
-     else{
-     formattedInput += current;
-     ++index;
-     }
-     break;
-     
-     case '(':
-     dataFile.get(current);   // Move foward to check for '*', the start of a comment
-     
-     if (current != '*')                 // Not a comment
-     {
-     dataFile.unget().unget();       // Move parser back twice
-     dataFile.get(current);          // Get the '(' value we just passed by
-     formattedInput +=  current;     // Appened the '(' value
-     ++index;
-     }
-     else                                // Start of comment
-     {                                   // Move forward until comment close: '*)'
-     while (!(current == '*'))       // Check for 1st of 2 symbols that represent the closing comment
-     dataFile.get(current);
-     while (!(current == ')'))       // Check for 2nd of 2 symbols that represent the closing comment
-     dataFile.get(current);
-     }
-     break;
-     
-     case ' ':
-     if (formattedInput[index - 1] == ' ' || formattedInput[index - 1] == ';')
-     break;
-     
-     case '\n':
-     if (formattedInput[index - 1] == '\n')
-     {
-     if (formattedInput[index - 2] == '\n')
-     --index;
-     break;
-     }
-     
-     default:
-     
-     if (formattedInput[index - 1] == '+' ||
-     formattedInput[index - 1] == '-' ||
-     formattedInput[index - 1] == '*' ||
-     formattedInput[index - 1] == '/' ||
-     formattedInput[index - 1] == '=')
-     {
-     formattedInput += ' ';
-     ++index;
-     
-     }
-     
-     formattedInput += current;
-     ++index;
-     break;
-     }
-     
-     
-     
-     }
-     }
-     
-     
-     // Open File for input
-     bool LanguageParser::OpenFileIn(string fileName)
-     {
-     dataFile.open(fileName, ios::in);  // Open fstream obj for input
-     
-     return (!dataFile.fail());  // Check if file is ready for input
-     }
-     
-     // Open File for output
-     bool LanguageParser::OpenFileOut(string fileName)
-     {
-     dataFile.open(fileName, std::ios_base::app);  // Open fstream obj for output (append mode)
-     
-     return (!dataFile.fail());  // Check if file is ready for output
-     }
-     
-     // Write to file. If file isn't found, create it
-     void LanguageParser::WriteFile()
-     {
-     if (dataFile)  // Check if data file is open
-     dataFile << formattedInput;
-     }
-     
-     // Close file
-     void LanguageParser::CloseFile()
-     {
-     dataFile.close();  // Close current fstream obj for input/output
-     }
-     
-     // Flush file, causing stream buffer to flush its output buffer
-     void LanguageParser::FlushFile()
-     {
-     dataFile.flush();
-     }
-     
-     // Destructor
-     LanguageParser::~LanguageParser(){}
-     
-     */

@@ -29,19 +29,24 @@ using namespace std;
     {
         public:
 
+            string rawData;
             string formattedInput;
             fstream dataFile;                     // FStream Obj, used for input/output of file
         
             LanguageParser();                     // Default Constructor
+            
+            void HandleInput();                   // Just calls following 4 functions
         
+            void ReadFile();
+            void RemoveComments();
+            void RemoveWhitespace();
+            void AddSpacing();
+
             bool OpenFileIn(string fileName);     // Open fstream obj for input
             bool OpenFileOut(string fileName);    // Open fstream obj for output (append mode)
 
-            void FormatLanguage();
-
             void CloseFile();                     // Close current fstream obj for input/output
-            void ReadFile();                      // Read-in, display contents of file
-            void WriteFile();  // Write to file, if it isn't found, create it
+            void WriteFile();                     // Write to file, if it isn't found, create it
             void FlushFile();                     // Flush file, causing stream buffer
                                                   // to flush its output buffer
             ~LanguageParser();                    // Destructor
