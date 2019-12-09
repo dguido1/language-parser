@@ -4,36 +4,7 @@
 #include <cstring>
 #include <algorithm>        //std::erase and std::remove
 #include <cstdio>           //remove
-/*  File that should be converted:
-        PROGRAM aba13;
-        VAR
-        ab5, cb, be, eb : INTEGER;
-        BEGIN
-        ab5 = 5;
-        cb = 10;
-        PRINT(‘ab5=’, ab5);
-        cb = cb + ab5;
-        PRINT( ‘eb=’, eb );
-        be = 2 * ab5 + eb;
-        PRINT( be );
-        END.
-    Expected output:
-        #include <iostream>
-        using namespace std;
-        int main()
-        {
-        int ab5, cb, be, eb;
-        ab5 = 5
-        cb = 10;
-        cout << ”ab5=” << ab5;
-        eb = cb + ab5;
-        cout << eb;
-        be = 2 * ab5 + eb;
-        cout << be;
-        return 0;
-}
 
-*/
 bool exists(std::string filename) {
     std::ifstream checkfile(filename);
     bool result;
