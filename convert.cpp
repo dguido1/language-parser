@@ -115,8 +115,9 @@ int main(int argc, const char* argv[]) {
 
         //TO DO: buggy asf
         if(strstr(word.c_str(), "PRINT") != NULL) {     //Case 1 is to print
-            outfile << "cout << ";
+            outfile << "cout ";
             while(strchr(word.c_str(), ';') == NULL) {
+                outfile << "<< ";
                 if(*word.begin() == 'P') {
                     word.erase(0, 5);       //Erase "PRINT"
                 }
@@ -143,13 +144,14 @@ int main(int argc, const char* argv[]) {
                 infile >> word;
             }
             if(strcmp(word.c_str(), ");") > 0) {
-                if(strchr(word.c_str(), ';') != NULL) {
-                    if(strchr(word.c_str(), ')') != NULL) {
-                        word.erase(std::remove(word.begin(), word.end(), ')'), word.end());
-                        word.erase(std::remove(word.begin(), word.end(), ';'), word.end());
-                    }
-                    outfile << " << " << word;
+                if(*word.begin() == 'P') {
+                    word.erase(0, 5);       //Erase "PRINT"
                 }
+                word.erase(std::remove(word.begin(), word.end(), '('), word.end());
+                word.erase(std::remove(word.begin(), word.end(), ')'), word.end());
+                word.erase(std::remove(word.begin(), word.end(), ';'), word.end());
+
+                outfile << " << " << word;
             }
             outfile << ";";
 
