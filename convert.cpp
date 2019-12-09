@@ -126,20 +126,7 @@ int main(int argc, const char* argv[]) {
                 }
                 std::replace(word.begin(), word.end(), '\'', '\"');
                 word.erase(std::remove(word.begin(), word.end(), ','), word.end());
-                /*
-                        PROGRAM aba13;
-                        VAR
-                        ab5, cb, be, eb : INTEGER;
-                        BEGIN
-                        ab5 = 5;
-                        cb = 10;
-                        PRINT(‘ab5=’, ab5);
-                        cb = cb + ab5;
-                        PRINT( ‘eb=’, eb );
-                        be = 2 * ab5 + eb;
-                        PRINT( be );
-                        END.
-                */
+
                 outfile << word;
                 infile >> word;
             }
@@ -147,6 +134,7 @@ int main(int argc, const char* argv[]) {
                 if(*word.begin() == 'P') {
                     word.erase(0, 5);       //Erase "PRINT"
                 }
+                std::replace(word.begin(), word.end(), '\'', '\"');
                 word.erase(std::remove(word.begin(), word.end(), '('), word.end());
                 word.erase(std::remove(word.begin(), word.end(), ')'), word.end());
                 word.erase(std::remove(word.begin(), word.end(), ';'), word.end());
