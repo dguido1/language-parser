@@ -50,10 +50,15 @@ int main(int argc, const char* argv[]) {
     std::ofstream outfile;
     std::string word;
 
-    std::string variable_names[10], data_type;
+    std::string variable_names[10];
     int i = 0;
 
     infile >> word;     // PROGRAM
+
+    if(!infile) {
+        std::cerr << "Error! Format:\n\t\"./convert file.txt\"\n";
+        exit(1);
+    }
     if(strcmp(word.c_str(), "PROGRAM") == 0) {
         infile >> word;         // abc13;
         word.erase(std::remove(word.begin(), word.end(), ';'), word.end());     //src: https://stackoverflow.com/questions/20326356/how-to-remove-all-the-occurrences-of-a-char-in-c-string
@@ -82,52 +87,72 @@ int main(int argc, const char* argv[]) {
         }
         i--;        //Since the last input from the above loop will be the :
         const int variables = i;
-        // for(int j = 0; j <= variables; ++j) {
-        //     std::cout << variable_names[j] << " ";
-        // }
         infile >> word;
         if(strstr(word.c_str(), "INTEGER") == NULL) {       //Means the next input from file does not include "INTEGER"
-            std::cerr << "Error! Current word " << word << " != \"INTEGER;\"!\n";
+            std::cerr << "Error! Expected \"INTEGER\" but received " << word << "!\n";
             infile.close();
             outfile.close();
             exit(1);
         }
         else {
-            data_type = "int";
+            outfile << "\tint";
         }
-        outfile << data_type;
         int j = 0;
         while(j < variables) {
             outfile << " " << variable_names[j++];
         }
-        outfile << ";\n";
+        outfile << ";\n\t";
     }
     infile >> word;
     if(strcmp(word.c_str(), "BEGIN") != 0) {
-        std::cerr << "Error! Current word " << word << " != \"BEGIN\"!\n";
+        std::cerr << "Error! Expected \"BEGIN\" but received " << word << "!\n";
         infile.close();
         outfile.close();
         exit(1);
     }
     while(1) {
-        infile >> word;
+        infile >> word;     //Could possibly be either a print or an assignment operation
 
         //TO DO: buggy asf
         if(strstr(word.c_str(), "PRINT") != NULL) {     //Case 1 is to print
             outfile << "cout << ";
             while(strchr(word.c_str(), ';') == NULL) {
-                std::string::iterator sit = word.begin();
-                if(*sit != '\'') {
-                    ++sit;
-                    outfile << "\"";
-                    while(*sit != '\'' && sit != word.end()) {
-                        outfile << *sit;
-                        ++sit;
-                    }
-                    outfile << "\";";
+                if(*word.begin() == 'P') {
+                    word.erase(0, 5);       //Erase "PRINT"
                 }
+                if(strchr(word.c_str(), '(') != NULL) {
+                    word.erase(std::remove(word.begin(), word.end(), '('), word.end());
+                }
+                std::replace(word.begin(), word.end(), '\'', '\"');
+                word.erase(std::remove(word.begin(), word.end(), ','), word.end());
+                /*
+                        PROGRAM aba13;
+                        VAR
+                        ab5, cb, be, eb : INTEGER;
+                        BEGIN
+                        ab5 = 5;
+                        cb = 10;
+                        PRINT(‘ab5=’, ab5);
+                        cb = cb + ab5;
+                        PRINT( ‘eb=’, eb );
+                        be = 2 * ab5 + eb;
+                        PRINT( be );
+                        END.
+                */
+                outfile << word;
                 infile >> word;
             }
+            if(strcmp(word.c_str(), ");") > 0) {
+                if(strchr(word.c_str(), ';') != NULL) {
+                    if(strchr(word.c_str(), ')') != NULL) {
+                        word.erase(std::remove(word.begin(), word.end(), ')'), word.end());
+                        word.erase(std::remove(word.begin(), word.end(), ';'), word.end());
+                    }
+                    outfile << " << " << word;
+                }
+            }
+            outfile << ";";
+
         }
         else if(strstr(word.c_str(), "END.") != NULL) {
             break;
@@ -139,24 +164,12 @@ int main(int argc, const char* argv[]) {
             }
             outfile << word;
         }
-        outfile << "\n";
+        outfile << "\n\t";
     }
-
-/*
-#include <iostream>
-
-using namespace std;
-
-int main(int argc, const char* argv[]) {
-
-int ab5, cb, be, eb;ab5=5;
-
-*/
-    
 
 
     //End the .cpp file
-    outfile << "\nreturn 0;\n}";
+    outfile << "\n\treturn 0;\n}";
     infile.close();
     outfile.close();
     return 0;
