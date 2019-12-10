@@ -48,11 +48,16 @@
      NUM = 264,
      SEMICOLON = 265,
      COMMA = 266,
-     PAREN = 267,
-     OP = 268,
-     EQ = 269,
-     QUOTE = 270,
-     STRING = 271
+     LPAREN = 267,
+     RPAREN = 268,
+     ADD = 269,
+     SUBT = 270,
+     MULT = 271,
+     DIV = 272,
+     EQ = 273,
+     QUOTE = 274,
+     IDENTIFIER = 275,
+     STRING = 276
    };
 #endif
 /* Tokens.  */
@@ -65,24 +70,29 @@
 #define NUM 264
 #define SEMICOLON 265
 #define COMMA 266
-#define PAREN 267
-#define OP 268
-#define EQ 269
-#define QUOTE 270
-#define STRING 271
+#define LPAREN 267
+#define RPAREN 268
+#define ADD 269
+#define SUBT 270
+#define MULT 271
+#define DIV 272
+#define EQ 273
+#define QUOTE 274
+#define IDENTIFIER 275
+#define STRING 276
 
 
 
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE
-#line 9 "parse.y"
+#line 8 "parse.y"
 {
     char* s;
     int i;
 }
 /* Line 1529 of yacc.c.  */
-#line 86 "parse.tab.h"
+#line 96 "parse.tab.h"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1

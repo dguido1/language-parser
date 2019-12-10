@@ -1,6 +1,5 @@
 //parse.y
 %{
-    #include "lex.yy.c"
     extern int yylex();
     void yyerror(char* msg);
 
@@ -23,7 +22,7 @@
 // %token <s> PRINT
 
 %token PROGRAM VAR BEGIN END INTEGER PRINT NUM
-%token SEMICOLON COMMA PAREN OP EQ QUOTE
+%token SEMICOLON COMMA LPAREN RPAREN ADD SUBT MULT DIV EQ QUOTE IDENTIFIER
 %token <s> STRING
 %type <s> id expr term factor
 
@@ -93,3 +92,4 @@ letter      :   'a' | 'b' | 'c' | 'd' | 'e' | 'f'
 void yyerror(char* msg) {
     printf("Error! %s\n", msg);
 } 
+#include "lex.yy.c"
