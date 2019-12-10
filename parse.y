@@ -2,12 +2,15 @@
 %{
     #include <stdio.h>
     #include <stdlib.h>
+    #include <string.h>
     #include <stdbool.h>
+    #include <ctype.h>
 
     extern int yylex();
     FILE * output;
+    bool exist(char* filename);
     void yyerror(char* msg);
-
+    bool identifier(char* id);
 %}
 
 %union{
@@ -16,48 +19,62 @@
 }
 
 //* and / have HIGHER PRECEDENCE than - and +
-%left '-' '+'
-%left '*' '/'
+// %left '-' '+'
+// %left '*' '/'
 
 %token <i> NUM
-%token PROGRAM VAR BEGIN END INTEGER PRINT 
-%token SEMICOLON COMMA LPAREN RPAREN ADD SUBT MULT DIV EQ QUOTE
+%token PROGRAM VAR START END INTEGER PRINT 
+%token SEMICOLON COMMA LPAREN RPAREN ADD SUBT MULT DIV EQ QUOTE PERIOD COLON
 %token <s> STRING       //Defined in parse.lex as:      [a-zA-Z0-9]+
-%type <s> id 
-%type <i> expr term factor 
+%type <s> id dec pname
+%type <i> assign expr term factor 
 
 %%
-start       :   PROGRAM pname SEMICOLON VAR COMMA declist SEMICOLON BEGIN statlist END PERIOD
+start       :   PROGRAM pname semicolon var comma declist semicolon start statlist end period
+            |   { yyerror("PROGRAM is expected\n"); }
             ;
 pname       :   STRING
+            |   { yyerror("Program name is missing\n"); }
             ;
-id          :   letter L
-            |   letter
+var         :   VAR
+            |   { yyerror("VAR is expected\n"); }
             ;
-L           :   letter L
-            |   letter
-            |   digit L
-            |   digit
+comma       :   COMMA
+            |   { yyerror(", is missing\n"); }
+            ;
+semicolon   :   SEMICOLON
+            |   { yyerror(": is missing\n"); }
+            ;
+end         :   END
+            |   { yyerror("END is expected\n"); }
+period      :   PERIOD
+            |   { yyerror(". is missing\n"); }
+id          :   STRING  { if(!identifier($1)) { yyerror("INVALID IDENTIFIER\n"); } }
             ;
 
 declist     :   dec COLON type
+            |   dec type        { yyerror(": is missing\n"); }
             ;
 dec         :   id COMMA dec    { fprintf(output, "%s, %s", $1, $3); }
             |   id              { fprintf(output, "%s;", $1); }
             ;
 
-statlist    :   stat SEMICOLON
-            |   stat SEMICOLON statlist
+statlist    :   stat semicolon
+            |   stat semicolon statlist
             ;
 stat        :   print
             |   assign
             ;
 print       :   PRINT LPAREN output RPAREN  { fprintf(output, "cout << "); }
-            ;
-output      :   STRING COMMA id { fprintf(output, "\"%s\", %s;", %1, %3); }
-            |   id  { fprintf(output, "%s", $1); }
+            |   PRINT output RPAREN { yyerror("( is missing\n"); }
+            |   PRINT LPAREN output { yyerror(") is missing\n"); }
+            ; 
+output      :   STRING COMMA id { fprintf(output, "\"%s\" << %s;", $1, $3); }
+            |   id  { fprintf(output, "%s;", $1); }
+            |   STRING id { yyerror(", is missing\n"); }
             ;
 assign      :   id EQ expr         { $$ = $3; }
+            |   id expr { yyerror("= is missing\n"); }
             ;
 
 expr        :   term
@@ -73,6 +90,8 @@ term        :   term MULT factor     { $$ = $1 * $3; }
 factor      :   id
             |   number
             |   LPAREN expr RPAREN
+            |   expr RPAREN     { yyerror("( is missing"); }
+            |   LPAREN expr     { yyerror(") is missing"); }
             ;
 
 number      :   digit
@@ -83,19 +102,31 @@ type        :   INTEGER
 digit       :   NUM
             ;
 
-letter      :   'a' | 'b' | 'c' | 'd' | 'e' | 'f'
-            ;
 %%
 
 bool exist(char* filename) {
     FILE* checkfile = fopen(filename, "r");      //Pass in "r" since read does not create a file
-    if(!fopen) {
+    if(!checkfile) {
         return false;
     }
     else {
         return true;
     }
 }
+
+bool identifier(char* id) {
+    char invalid[] = "!@#$%^&*()-+=;:{}|\\\"\',<.>?/ ";      //Invalid characters
+    if(isdigit(id[0]) || strpbrk(id, invalid)) {        //First character cannot be a digit, and the whole string cannot have the invalid characters 
+        return false;
+    }
+    else {
+        return true;
+    }
+}
+
+void yyerror(char* msg) {
+    printf("Error! %s\n", msg);
+} 
 
 int main() {
     //Delete "abc13.cpp" if already exists
@@ -104,8 +135,8 @@ int main() {
     }
     //Create the file "abc13.cpp"
     output = fopen("abc13.cpp", "a");       //Pass "a" to create the file and append to it
-    if(!fopen) {
-        fprintf(stderr, "Could not create abc13.cpp!\n";);
+    if(!output) {
+        fprintf(stderr, "Could not create abc13.cpp!\n");
         exit(1);
     }
     //Init the output file
@@ -117,7 +148,4 @@ int main() {
     fclose(output);
 }
 
-void yyerror(char* msg) {
-    printf("Error! %s\n", msg);
-} 
 #include "lex.yy.c"

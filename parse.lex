@@ -11,7 +11,7 @@ number      ([0-9])+
 %%
 "PROGRAM"       {   return(PROGRAM);    }
 "VAR"           {   return(VAR);        }
-"BEGIN"         {   return(BEGIN);      }
+"BEGIN"         {   return(START);      }
 "END"           {   return(END);        }
 "INTEGER"       {   return(INTEGER);    }
 "PRINT"         {   return(PRINT);      }
@@ -28,14 +28,7 @@ number      ([0-9])+
 "/"             {   return(DIV);        }
 "="             {   return(EQ);         }
 "'"             {   return(QUOTE);      }
-[a-zA-Z_][a-zA-Z0-9_]+      {   yylval.string = strdup(yytext);
+[a-zA-Z_][a-zA-Z0-9_]*      {   yylval.s = strdup(yytext);
                                 return(STRING);
                             }
 %%
-
-void yyerror(char* msg) {
-    printf("Error! %s\n", msg);
-} 
-int main() {
-    yylex();
-}
