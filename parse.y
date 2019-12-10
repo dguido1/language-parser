@@ -1,6 +1,11 @@
 //parse.y
 %{
+    #include <stdio.h>
+    #include <stdlib.h>
+    #include <stdbool.h>
+
     extern int yylex();
+    FILE * output;
     void yyerror(char* msg);
 
 %}
@@ -14,25 +19,18 @@
 %left '-' '+'
 %left '*' '/'
 
-// %token <s> PROGRAM
-// %token <s> VAR
-// %token <s> BEGIN
-// %token <s> END
-// %token <i> INTEGER
-// %token <s> PRINT
-
-%token PROGRAM VAR BEGIN END INTEGER PRINT NUM
-%token SEMICOLON COMMA LPAREN RPAREN ADD SUBT MULT DIV EQ QUOTE IDENTIFIER
-%token <s> STRING
-%type <s> id expr term factor
+%token <i> NUM
+%token PROGRAM VAR BEGIN END INTEGER PRINT 
+%token SEMICOLON COMMA LPAREN RPAREN ADD SUBT MULT DIV EQ QUOTE
+%token <s> STRING       //Defined in parse.lex as:      [a-zA-Z0-9]+
+%type <s> id 
+%type <i> expr term factor 
 
 %%
-
-start       :   PROGRAM pname ';' VAR ',' declist ';' BEGIN statlist END '.'
+start       :   PROGRAM pname SEMICOLON VAR COMMA declist SEMICOLON BEGIN statlist END PERIOD
             ;
-pname       :   id
+pname       :   STRING
             ;
-
 id          :   letter L
             |   letter
             ;
@@ -42,52 +40,82 @@ L           :   letter L
             |   digit
             ;
 
-declist     :   dec ':' type
+declist     :   dec COLON type
             ;
-dec         :   id ',' dec
-            |   id
+dec         :   id COMMA dec    { fprintf(output, "%s, %s", $1, $3); }
+            |   id              { fprintf(output, "%s;", $1); }
             ;
 
-statlist    :   stat ';'
-            |   stat ';' statlist
+statlist    :   stat SEMICOLON
+            |   stat SEMICOLON statlist
             ;
 stat        :   print
             |   assign
             ;
-print       :   PRINT '(' output ')'
+print       :   PRINT LPAREN output RPAREN  { fprintf(output, "cout << "); }
             ;
-output      :   STRING ',' id
-            |   id
-assign      :   id '=' expr         { $1 = $3; }
+output      :   STRING COMMA id { fprintf(output, "\"%s\", %s;", %1, %3); }
+            |   id  { fprintf(output, "%s", $1); }
+            ;
+assign      :   id EQ expr         { $$ = $3; }
             ;
 
 expr        :   term
-            |   expr '+' term       { $$ = $1 + $3; }
-            |   expr '-' term       { $$ = $1 - $3; }
+            |   expr ADD term       { $$ = $1 + $3; }
+            |   expr SUBT term       { $$ = $1 - $3; }
             ;
 
-term        :   term '*' factor     { $$ = $1 * $3; }
-            |   term '/' factor     { $$ = $1 / $3; }
+term        :   term MULT factor     { $$ = $1 * $3; }
+            |   term DIV factor     { $$ = $1 / $3; }
             |   factor
             ;
 
 factor      :   id
             |   number
-            |   '(' expr ')'
+            |   LPAREN expr RPAREN
             ;
 
 number      :   digit
-            |   digit number
             ;
 type        :   INTEGER
             ;
 
-digit       :   '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9'
+digit       :   NUM
             ;
 
 letter      :   'a' | 'b' | 'c' | 'd' | 'e' | 'f'
             ;
 %%
+
+bool exist(char* filename) {
+    FILE* checkfile = fopen(filename, "r");      //Pass in "r" since read does not create a file
+    if(!fopen) {
+        return false;
+    }
+    else {
+        return true;
+    }
+}
+
+int main() {
+    //Delete "abc13.cpp" if already exists
+    if(exist("abc13.cpp")) {
+        remove("abc13.cpp");
+    }
+    //Create the file "abc13.cpp"
+    output = fopen("abc13.cpp", "a");       //Pass "a" to create the file and append to it
+    if(!fopen) {
+        fprintf(stderr, "Could not create abc13.cpp!\n";);
+        exit(1);
+    }
+    //Init the output file
+    fprintf(output, "#include <iostream>\n\nusing namespace std;\n\nint main(int argc, const char* argv[]) {\n");
+
+    yyparse();      //Generate the code by parsing the input
+
+    fprintf(output, "\nreturn 0;\n}");      //The end of the output file
+    fclose(output);
+}
 
 void yyerror(char* msg) {
     printf("Error! %s\n", msg);

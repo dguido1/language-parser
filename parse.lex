@@ -2,10 +2,6 @@
 #include "parse.tab.h"
 #include <stdio.h>
 #include <string.h>
-#include <ctype.h>
-#include <stdbool.h>
-
-bool identifier(char* id);
 %}
 
 %option noyywrap
@@ -16,10 +12,12 @@ number      ([0-9])+
 "PROGRAM"       {   return(PROGRAM);    }
 "VAR"           {   return(VAR);        }
 "BEGIN"         {   return(BEGIN);      }
-"END."          {   return(END);        }
+"END"           {   return(END);        }
 "INTEGER"       {   return(INTEGER);    }
 "PRINT"         {   return(PRINT);      }
 {number}        {   return(NUM);        }
+"."             {   return(PERIOD);     }
+":"             {   return(COLON);      }
 ";"             {   return(SEMICOLON);  }
 ","             {   return(COMMA);      }
 "("             {   return(LPAREN);     }
@@ -30,8 +28,9 @@ number      ([0-9])+
 "/"             {   return(DIV);        }
 "="             {   return(EQ);         }
 "'"             {   return(QUOTE);      }
-[a-zA-Z][a-zA-Z0-9]*    {   return(IDENTIFIER); }
-
+[a-zA-Z_][a-zA-Z0-9_]+      {   yylval.string = strdup(yytext);
+                                return(STRING);
+                            }
 %%
 
 void yyerror(char* msg) {
