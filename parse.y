@@ -9,8 +9,12 @@
     extern int yylex();
     FILE * output;
     bool exist(char* filename);
+    bool id_exists(char* identify);
     void yyerror(char* msg);
-    bool identifier(char* id);
+
+    //Something to hold the identifiers
+    char dec_ids[20][20];
+    int i = 0, num_ids = 0;
 %}
 
 %union{
@@ -19,89 +23,112 @@
 }
 
 //* and / have HIGHER PRECEDENCE than - and +
-// %left '-' '+'
-// %left '*' '/'
+// %left SUBT ADD
+// %left MULT DIV
 
-%token <i> NUM
-%token PROGRAM VAR START END INTEGER PRINT 
-%token SEMICOLON COMMA LPAREN RPAREN ADD SUBT MULT DIV EQ QUOTE PERIOD COLON
-%token <s> STRING       //Defined in parse.lex as:      [a-zA-Z0-9]+
-%type <s> id dec pname
-%type <i> assign expr term factor 
+
+%token <s> NUM
+%token <s> PROGRAM VAR START END INTEGER PRINT 
+%token SEMICOLON LPAREN RPAREN ADD SUBT MULT DIV EQ PERIOD COLON COMMA QUOTE
+%token <s> STRING IDENTIFIER
+%type <s> id holdid dec pname type string assign expr term factor number digit
+
+%nonassoc "least"
+%nonassoc ADD
+%nonassoc SUBT
+%nonassoc MULT
+%nonassoc DIV
+
 
 %%
-start       :   PROGRAM pname semicolon var comma declist semicolon start statlist end period
-            |   { yyerror("PROGRAM is expected\n"); }
+start       :   PROGRAM { printf("PROGRAM"); } pname semicolon var declist semicolon begin statlist end period
+            |   { yyerror("PROGRAM is expected\n"); exit(1); }
             ;
-pname       :   STRING
-            |   { yyerror("Program name is missing\n"); }
+pname       :   IDENTIFIER   { $$ = $1; printf("Program name %s ", $1); }
+            |   { yyerror("Program name is missing\n"); exit(1); }
             ;
-var         :   VAR
-            |   { yyerror("VAR is expected\n"); }
+var         :   VAR     { printf("VAR"); }
+            |   { yyerror("VAR is expected\n"); exit(1); }
             ;
-comma       :   COMMA
-            |   { yyerror(", is missing\n"); }
+colon       :   COLON { printf("COLON\n"); }
+            |   { yyerror("COLON : is missing\n"); exit(1); }
             ;
-semicolon   :   SEMICOLON
-            |   { yyerror(": is missing\n"); }
+semicolon   :   SEMICOLON { printf("SEMICOLON"); }
+            |   { yyerror("SEMICOLON ; is missing\n"); exit(1); }
             ;
-end         :   END
-            |   { yyerror("END is expected\n"); }
-period      :   PERIOD
-            |   { yyerror(". is missing\n"); }
-id          :   STRING  { if(!identifier($1)) { yyerror("INVALID IDENTIFIER\n"); } }
+begin       :   START   { printf("BEGIN"); }
+            |   { yyerror("BEGIN is expected\n"); exit(1); }
+            ;
+end         :   END { printf("END\n"); }
+            |   { yyerror("END is expected\n"); exit(1); }
+            ;
+prnt        :   PRINT { printf("PRINT\n"); }
+            ;
+string      :   STRING { $$ = $1; printf("STRING\n"); }
+            ;
+lparen      :   LPAREN { printf("LPAREN\n"); }
+            |   { yyerror("LPAREN ( is missing\n"); exit(1); }
+            ;
+rparen      :   RPAREN { printf("RPAREN\n"); }
+            |   { yyerror("RPAREN ) is missing\n"); exit(1); }
             ;
 
-declist     :   dec COLON type
-            |   dec type        { yyerror(": is missing\n"); }
+eq          :   EQ { fprintf(output, " = "); printf("EQ\n"); }
+            |   { yyerror("EQ = is missing\n"); exit(1); }
             ;
-dec         :   id COMMA dec    { fprintf(output, "%s, %s", $1, $3); }
-            |   id              { fprintf(output, "%s;", $1); }
+add         :   ADD { printf("ADD\n"); }
             ;
-
-statlist    :   stat semicolon
-            |   stat semicolon statlist
+subt        :   SUBT { printf("SUBT\n"); }
+            ;
+mult        :   mult { printf("MULT\n"); }
+            ;
+div         :   DIV { printf("DIV\n"); }
+            ;
+period      :   PERIOD  { printf("PERIOD\n"); }
+            |   { yyerror("PERIOD . is missing\n"); exit(1); }
+            ;
+id          :   IDENTIFIER  { fprintf(output, "%s", $1); printf("IDENTIFIER -- %s\n", $1); }
+            ;
+holdid      :   IDENTIFIER  { strcpy(dec_ids[num_ids++], $1); }
+            ;
+declist     :   dec colon type { fprintf(output, "int "); while(i < num_ids - 1) { fprintf(output, "%s, ", dec_ids[i++]); } fprintf(output, "%s;\n", dec_ids[i]); }
+            ;
+dec         :   holdid COMMA dec
+            |   holdid dec { yyerror("COMMA , is missing\n"); exit(1); }
+            |   holdid
+            ;
+statlist    :   stat semicolon  { fprintf(output, ";\n"); }
+            |   stat semicolon { fprintf(output, ";\n"); } statlist
             ;
 stat        :   print
             |   assign
             ;
-print       :   PRINT LPAREN output RPAREN  { fprintf(output, "cout << "); }
-            |   PRINT output RPAREN { yyerror("( is missing\n"); }
-            |   PRINT LPAREN output { yyerror(") is missing\n"); }
+print       :   prnt { fprintf(output, "cout << "); } lparen output rparen  
             ; 
-output      :   STRING COMMA id { fprintf(output, "\"%s\" << %s;", $1, $3); }
-            |   id  { fprintf(output, "%s;", $1); }
-            |   STRING id { yyerror(", is missing\n"); }
+output      :   string { fprintf(output, "%s << ", $1); } COMMA { printf("COMMA\n"); } id
+            |   IDENTIFIER { if(id_exists($1)) { fprintf(output, "%s", $1); } }
             ;
-assign      :   id EQ expr         { $$ = $3; }
-            |   id expr { yyerror("= is missing\n"); }
+assign      :   IDENTIFIER { if(!id_exists($1)) { printf("UKNOWN IDENTIFIER\n"); exit(1); } fprintf(output, "%s", $1);  printf("IDENTIFIER -- %s\n", $1); } 
+                eq expr     
             ;
-
 expr        :   term
-            |   expr ADD term       { $$ = $1 + $3; }
-            |   expr SUBT term       { $$ = $1 - $3; }
+            |   expr ADD { fprintf(output, " + "); printf("ADD"); } term
+            |   expr SUBT { fprintf(output, " - "); printf("SUBT"); } term
             ;
-
-term        :   term MULT factor     { $$ = $1 * $3; }
-            |   term DIV factor     { $$ = $1 / $3; }
-            |   factor
+term        :   factor  
+            |   term MULT { fprintf(output, " * "); printf("MULT"); } factor  
+            |   term DIV { fprintf(output, " / "); printf("DIV"); } factor    
             ;
-
-factor      :   id
-            |   number
-            |   LPAREN expr RPAREN
-            |   expr RPAREN     { yyerror("( is missing"); }
-            |   LPAREN expr     { yyerror(") is missing"); }
+factor      :   IDENTIFIER      { if(!id_exists($1)) { printf("UKNOWN IDENTIFIER\n"); exit(1); } fprintf(output, "%s", $1); printf("IDENTIFIER -- %s\n", $1); }
+            |   number  
+            |   lparen { fprintf(output, "("); } expr rparen { fprintf(output, ")"); }
             ;
-
-number      :   digit
+number      :   digit  
             ;
 type        :   INTEGER
             ;
-
-digit       :   NUM
+digit       :   NUM     { fprintf(output, "%d", atoi($1)); printf("NUM\n"); }
             ;
-
 %%
 
 bool exist(char* filename) {
@@ -114,18 +141,17 @@ bool exist(char* filename) {
     }
 }
 
-bool identifier(char* id) {
-    char invalid[] = "!@#$%^&*()-+=;:{}|\\\"\',<.>?/ ";      //Invalid characters
-    if(isdigit(id[0]) || strpbrk(id, invalid)) {        //First character cannot be a digit, and the whole string cannot have the invalid characters 
-        return false;
+bool id_exists(char* identify) {
+    for(int index = 0; index < num_ids; ++index) {
+        if(strcmp(dec_ids[index], identify) == 0) {
+            return true;
+        }
     }
-    else {
-        return true;
-    }
+    return false;
 }
 
 void yyerror(char* msg) {
-    printf("Error! %s\n", msg);
+    fprintf(stderr, "Error! %s", msg);
 } 
 
 int main() {
@@ -134,18 +160,14 @@ int main() {
         remove("abc13.cpp");
     }
     //Create the file "abc13.cpp"
-    output = fopen("abc13.cpp", "a");       //Pass "a" to create the file and append to it
+    output = fopen("abc13.cpp", "a");       //Pass "a" to create the file and append to it -- SEE pname
     if(!output) {
         fprintf(stderr, "Could not create abc13.cpp!\n");
         exit(1);
     }
     //Init the output file
     fprintf(output, "#include <iostream>\n\nusing namespace std;\n\nint main(int argc, const char* argv[]) {\n");
-
     yyparse();      //Generate the code by parsing the input
-
     fprintf(output, "\nreturn 0;\n}");      //The end of the output file
     fclose(output);
 }
-
-#include "lex.yy.c"
