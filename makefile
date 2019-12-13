@@ -1,7 +1,7 @@
 strip: LanguageParser.h LanguageParser.cpp LanguageParserControl.cpp
 	g++ LanguageParserControl.cpp LanguageParser.cpp -o striptext.out
-runstrip:
 	./striptext.out < final.txt
+
 
 parse:
 	flex parse.l
@@ -22,4 +22,4 @@ runparse:
 	./parse.out < revised.txt
 	
 remove:
-	rm lex.yy.c parse.out revised.txt striptext.out
+	rm lex.yy.c parse.tab.c parse.tab.h parse.out revised.txt striptext.out a.out abc13.cpp

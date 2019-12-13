@@ -17,7 +17,7 @@
     #include <fstream>
     #include <string>
 
-    #include "LanguageParser.hpp"   // Custom class imports
+    #include "LanguageParser.h"   // Custom class imports
 
     using namespace std;
 

@@ -28,12 +28,12 @@
 * Have a program that
   * ***Reads*** in the text file [`final.txt`](/final.txt)
   * ***Formats*** it properly
-  * ***Outputs*** the result to a second text file [`formatted.txt`](/formatted.txt)
+  * ***Outputs*** the result to a second text file [`revised.txt`](/revised.txt)
+  ***Command*** *make strip* will take *final.txt* and strip it of whitespace and comments
   
 * ***Specifies*** production rules using *Flex/Bison*
-
 * ***Translates*** the program into a *high level* programming language (C++)
-
+* ***Command for Flex/Bison*** *make parse* will take the new *revised.txt* file, parse it, and convert it into working C++ code
 * ***Runs*** [`abc13.cpp`](/abc.cpp) using the C++ compiler to the correct output
 ---
 
