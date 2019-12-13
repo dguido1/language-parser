@@ -29,7 +29,7 @@
   * ***Reads*** in the text file [`final.txt`](/final.txt)
   * ***Formats*** it properly
   * ***Outputs*** the result to a second text file [`revised.txt`](/revised.txt)
-  ***Command*** *make strip* will take *final.txt* and strip it of whitespace and comments
+  * ***Command*** *make strip* will take *final.txt* and strip it of whitespace and comments
   
 * ***Specifies*** production rules using *Flex/Bison*
 * ***Translates*** the program into a *high level* programming language (C++)
